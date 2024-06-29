@@ -60,21 +60,46 @@ public class ControllerKarsa {
     } 
     
     @PutMapping(value = "/{id}/modificar", produces = "application/json")
-    public ResponseEntity<String> modificarEmpleado(@RequestParam int idEmpleado, @RequestBody String empleado){
-        ResponseEntity<String> respuesta = null;
-        return respuesta; 
+    public ResponseEntity<Map<String, Object>> modificarEmpleado(@PathVariable Integer id,@Valid @RequestBody EmpleadoModel empleado, BindingResult binding){
+        Map<String, Object> data = new HashMap<>();
+        
+        if(binding.hasErrors()){
+            List<String> errores = new ArrayList<>();
+            binding.getFieldErrors().forEach(error -> {
+                errores.add(error.getDefaultMessage());
+            });
+            data.put("data", errores);
+            return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST );
+        }
+        data = empleadoServiceInt.modificarEmpleado(empleado, id); 
+        HttpStatus http = (HttpStatus) data.get("http");
+        return new ResponseEntity<>(data, http);
     }
     
     @DeleteMapping(value = "/{id}/borrar", produces = "application/json")
-    public ResponseEntity<String> borrarEmpleado(@RequestParam int idEmpleado){
-        ResponseEntity<String> respuesta = null; 
-        return respuesta; 
+    public ResponseEntity<Map<String, Object>> borrarEmpleado(@PathVariable Integer id){
+        Map<String, Object> data = new HashMap<>();
+        try{
+            data = empleadoServiceInt.boorarEmpleado(id);
+        }catch(Exception e){
+            String message = "Error parametro no valido";
+            data = empleadoServiceInt.crearRespuesta(Boolean.FALSE, HttpStatus.BAD_REQUEST, message, null);
+        }
+        HttpStatus http = (HttpStatus) data.get("http");
+        return new ResponseEntity<>(data, http);
     }
     
     @PostMapping(value = "/buscar", produces = "application/json")
-    public ResponseEntity<String>  buscarEmpleadoNombre(@RequestParam String nombre){
-        ResponseEntity<String> respuesta = null; 
-        return respuesta; 
+    public ResponseEntity<Map<String, Object>>  buscarEmpleadoNombre(@RequestParam String nombre){
+        Map<String, Object> data = new HashMap<>();
+        try{
+            data = empleadoServiceInt.buscarEmpleadoNombre(nombre);
+        }catch(Exception e){
+            String message = "Error parametro no valido";
+            data = empleadoServiceInt.crearRespuesta(Boolean.FALSE, HttpStatus.BAD_REQUEST, message, null);
+        }
+        HttpStatus http = (HttpStatus) data.get("http");
+        return new ResponseEntity<>(data, http);
     }    
     
 }

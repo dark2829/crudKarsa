@@ -24,6 +24,7 @@ public class EmpleadoModel {
     private Integer id;
     @NotBlank(message = "El nombre es requerido")
     private String nombreCompleto;
+    private String nombre; 
     @NotBlank(message = "El puesto es requerido")
     private String puesto;
     @NotNull(message = "El salario es requerido")

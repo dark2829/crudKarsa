@@ -8,8 +8,8 @@ import org.springframework.http.ResponseEntity;
 public interface IEmpleadoServicesInt {
     public Map<String, Object> crearEmpleado(EmpleadoModel empleado);
     public Map<String, Object> obtenerEmpleadoId(int id);
-    public ResponseEntity<?> modificarEmpleado(EmpleadoModel empleado);
-    public ResponseEntity<?> boorarEmpleado(int id);
-    public EmpleadoModel buscarEmpleadoNombre(String nombre);
+    public Map<String, Object> modificarEmpleado(EmpleadoModel empleado, Integer id);
+    public Map<String, Object> boorarEmpleado(int id);
+    public Map<String, Object> buscarEmpleadoNombre(String nombre);
     Map<String, Object> crearRespuesta(Boolean estatus, HttpStatus http, String mensaje, EmpleadoModel empleado);
 }
