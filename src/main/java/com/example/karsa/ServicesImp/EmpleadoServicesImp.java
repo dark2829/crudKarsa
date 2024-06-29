@@ -4,8 +4,11 @@ import com.example.karsa.ServicesInt.IEmpleadoServicesInt;
 import com.example.karsa.ServicesInt.ISecuenciaServiceInt;
 import com.example.karsa.model.EmpleadoModel;
 import com.example.karsa.repository.IEmpleadoRepository;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity; 
@@ -24,14 +27,13 @@ public class EmpleadoServicesImp implements IEmpleadoServicesInt{
     public Map<String, Object> crearEmpleado(EmpleadoModel empleado) {
         Map<String, Object> respuesta = null; 
         try{
-            //Metodo para generar id.
             Integer id = secuenciaServices.getSecuencia();
             empleado.setId(id);
             EmpleadoModel empleadoCreado = empleadoRepository.save(empleado); 
             if(empleadoCreado != null){
                 respuesta = crearRespuesta(Boolean.TRUE, HttpStatus.OK, "Empleado creado exitosamente", empleadoCreado);
             }else{
-                respuesta = crearRespuesta(Boolean.FALSE, HttpStatus.FAILED_DEPENDENCY, "Error al crear el empleado", empleadoCreado);
+                respuesta = crearRespuesta(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Error al crear el empleado", empleadoCreado);
             }
         }catch(Exception e){
             respuesta = crearRespuesta(Boolean.FALSE, HttpStatus.INTERNAL_SERVER_ERROR, "Error inminente", null);
@@ -41,8 +43,20 @@ public class EmpleadoServicesImp implements IEmpleadoServicesInt{
     }
 
     @Override
-    public EmpleadoModel obtenerEmpleadoId(int id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public Map<String, Object> obtenerEmpleadoId(int id) {
+        Map<String, Object> respuesta; 
+        try{
+            EmpleadoModel empleado = getEmpleado(id);
+            if(empleado != null){
+                respuesta = crearRespuesta(Boolean.TRUE, HttpStatus.OK, "Empleado encontrado", empleado);
+            }else{
+                respuesta = crearRespuesta(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Empleado encontrado", empleado);
+            }
+        }catch(Exception e){
+            respuesta = crearRespuesta(Boolean.FALSE, HttpStatus.INTERNAL_SERVER_ERROR, "Error inminente", null);
+            System.out.println("Error inesperado al consultar un empleado: "+e);
+        }
+        return respuesta; 
     }
 
     @Override
@@ -60,6 +74,7 @@ public class EmpleadoServicesImp implements IEmpleadoServicesInt{
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
+    @Override
     public Map<String, Object> crearRespuesta(Boolean estatus, HttpStatus http, String mensaje, EmpleadoModel empleado){
         Map<String, Object> respuesta = new HashMap<>();
         respuesta.put("status", estatus);
@@ -67,6 +82,17 @@ public class EmpleadoServicesImp implements IEmpleadoServicesInt{
         respuesta.put("message", mensaje);
         respuesta.put("data", empleado);
         return respuesta; 
+    }
+    
+    public EmpleadoModel getEmpleado(Integer id){
+        EmpleadoModel empleado = null; 
+        List<EmpleadoModel> empleados = empleadoRepository.findAll();
+        for(EmpleadoModel empleadoIterador : empleados){
+            if(empleadoIterador.getId() == id){
+                empleado = empleadoIterador;
+            }
+        }
+        return empleado;
     }
     
 }
