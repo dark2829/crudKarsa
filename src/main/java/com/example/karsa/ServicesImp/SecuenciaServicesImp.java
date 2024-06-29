@@ -6,7 +6,9 @@ import com.example.karsa.repository.ISecuenciaRepository;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class SecuenciaServicesImp implements ISecuenciaServiceInt{
     
     @Autowired
@@ -19,6 +21,10 @@ public class SecuenciaServicesImp implements ISecuenciaServiceInt{
         if(!secuencias.isEmpty()){
             secuencia = secuencias.stream().max(Comparator.comparing(SecuenciaModel::getSecuencia)).get().getSecuencia() + 1;
         }
+        SecuenciaModel secuenciaToSave = new SecuenciaModel(); 
+        secuenciaToSave.setId(0);
+        secuenciaToSave.setSecuencia(secuencia);
+        saveOrUpdateSecuencia(secuenciaToSave);
         return secuencia; 
     }
 

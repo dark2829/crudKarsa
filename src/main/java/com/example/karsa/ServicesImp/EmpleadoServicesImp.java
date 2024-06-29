@@ -1,6 +1,7 @@
 package com.example.karsa.ServicesImp;
 
 import com.example.karsa.ServicesInt.IEmpleadoServicesInt;
+import com.example.karsa.ServicesInt.ISecuenciaServiceInt;
 import com.example.karsa.model.EmpleadoModel;
 import com.example.karsa.repository.IEmpleadoRepository;
 import java.util.HashMap;
@@ -16,11 +17,16 @@ public class EmpleadoServicesImp implements IEmpleadoServicesInt{
     @Autowired
     private IEmpleadoRepository empleadoRepository;
     
+    @Autowired
+    private ISecuenciaServiceInt secuenciaServices; 
+    
     @Override
     public Map<String, Object> crearEmpleado(EmpleadoModel empleado) {
         Map<String, Object> respuesta = null; 
         try{
             //Metodo para generar id.
+            Integer id = secuenciaServices.getSecuencia();
+            empleado.setId(id);
             EmpleadoModel empleadoCreado = empleadoRepository.save(empleado); 
             if(empleadoCreado != null){
                 respuesta = crearRespuesta(Boolean.TRUE, HttpStatus.OK, "Empleado creado exitosamente", empleadoCreado);
