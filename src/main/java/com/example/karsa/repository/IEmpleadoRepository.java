@@ -24,4 +24,11 @@ public interface IEmpleadoRepository extends MongoRepository<EmpleadoModel, Inte
      */
     @Query("{ 'nombre' : ?0 }")
     List<EmpleadoModel> findByName(String nombre);
+    /**
+     * Consulta el rfc para revisar si existe algun empleado con un rfc existente.
+     * @param nombre Recibe el {@link String} del nombre para realizar la busquda
+     * @return devuelve una lista, objeto o un elemento nulo en caso de no coincidir el elemento
+     */
+    @Query("{ 'rfc': ?0 }")
+    List<EmpleadoModel> findByRFC(String nombre);
 }

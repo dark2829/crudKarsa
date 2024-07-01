@@ -64,23 +64,28 @@ public class EmpleadoServicesImp implements IEmpleadoServicesInt{
      */
     @Override
     public Map<String, Object> crearEmpleado(EmpleadoModel empleado) {
-        Map<String, Object> respuesta = null; 
-        try{
-            Integer id = secuenciaServices.getSecuencia();
-            empleado.setId(id);
-            String nombre = getOnlyName(empleado.getNombreCompleto());
-            empleado.setNombre(nombre);
-            EmpleadoModel empleadoCreado = empleadoRepository.save(empleado); 
-            if(empleadoCreado != null){
-                respuesta = crearRespuesta(Boolean.TRUE, HttpStatus.OK, "Empleado creado exitosamente", empleadoCreado);
-            }else{
-                respuesta = crearRespuesta(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Error al crear el empleado", empleadoCreado);
+        Map<String, Object> respuesta = null;
+        try {
+            Boolean exiseOtroRFC = otherRFC(empleado.getRfc());
+            if (exiseOtroRFC == true) {
+                Integer id = secuenciaServices.getSecuencia();
+                empleado.setId(id);
+                String nombre = getOnlyName(empleado.getNombreCompleto());
+                empleado.setNombre(nombre);
+                EmpleadoModel empleadoCreado = empleadoRepository.save(empleado);
+                if (empleadoCreado != null) {
+                    respuesta = crearRespuesta(Boolean.TRUE, HttpStatus.OK, "Empleado creado exitosamente", empleadoCreado);
+                } else {
+                    respuesta = crearRespuesta(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Error al crear el empleado", empleadoCreado);
+                }
+            } else {
+                respuesta = crearRespuesta(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Error al crear el empleado RFC duplicado", null);
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             respuesta = crearRespuesta(Boolean.FALSE, HttpStatus.INTERNAL_SERVER_ERROR, "Error inminente", null);
-            System.out.println("Error inesperado al crear un empleado: "+e);
+            System.out.println("Error inesperado al crear un empleado: " + e);
         }
-        return respuesta; 
+        return respuesta;
     }
 
     /**
@@ -133,26 +138,33 @@ public class EmpleadoServicesImp implements IEmpleadoServicesInt{
      */
     @Override
     public Map<String, Object> modificarEmpleado(EmpleadoModel empleadoUpdate, Integer id) {
-        Map<String, Object> respuesta = null; 
-        try{
-            Map<String,Object> empleadoMap = obtenerEmpleadoId(id); 
-            if((Boolean) empleadoMap.get("status") ){
-                EmpleadoModel empleadoToModificar = (EmpleadoModel) empleadoMap.get("data");
-                Integer idOriginal = empleadoToModificar.getId();
-                empleadoToModificar = modificaEmpleado(empleadoToModificar, empleadoUpdate);
-                empleadoToModificar.setId(idOriginal);
-                empleadoToModificar = empleadoRepository.save(empleadoToModificar);
-                if(empleadoToModificar != null){
-                    respuesta = crearRespuesta(Boolean.TRUE, HttpStatus.OK, "Empleado modificado exitosamente", empleadoToModificar);
-                }else{
-                    respuesta = crearRespuesta(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Error al modificar el empleado", empleadoToModificar);
+        Map<String, Object> respuesta = null;
+        try {
+            Map<String, Object> empleadoMap = obtenerEmpleadoId(id);
+            Boolean existeOtroRFC = otherRFC(empleadoUpdate.getRfc(), (EmpleadoModel) empleadoMap.get("data"));
+            if (existeOtroRFC == true) {
+                if ((Boolean) empleadoMap.get("status")) {
+                    EmpleadoModel empleadoToModificar = (EmpleadoModel) empleadoMap.get("data");
+                    Integer idOriginal = empleadoToModificar.getId();
+                    empleadoToModificar = modificaEmpleado(empleadoToModificar, empleadoUpdate);
+                    empleadoToModificar.setId(idOriginal);
+                    String nombre = getOnlyName(empleadoUpdate.getNombreCompleto());
+                    empleadoToModificar.setNombre(nombre);
+                    empleadoToModificar = empleadoRepository.save(empleadoToModificar);
+                    if (empleadoToModificar != null) {
+                        respuesta = crearRespuesta(Boolean.TRUE, HttpStatus.OK, "Empleado modificado exitosamente", empleadoToModificar);
+                    } else {
+                        respuesta = crearRespuesta(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Error al modificar el empleado", empleadoToModificar);
+                    }
                 }
+            } else {
+                respuesta = crearRespuesta(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Error al modificar el empleado el rfc ya existe", null);
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             respuesta = crearRespuesta(Boolean.FALSE, HttpStatus.INTERNAL_SERVER_ERROR, "Error inminente", null);
-            System.out.println("Error inesperado al crear un empleado: "+e);
+            System.out.println("Error inesperado al crear un empleado: " + e);
         }
-        return respuesta; 
+        return respuesta;
     }
     
     /**
@@ -312,4 +324,32 @@ public class EmpleadoServicesImp implements IEmpleadoServicesInt{
         return nombre; 
     }
     
+    public Boolean otherRFC(String rfc) {
+        List<EmpleadoModel> empleados = new ArrayList<>();
+        Boolean existeOtherRFC = false;
+        if (rfc != null) {
+            empleados = empleadoRepository.findByRFC(rfc);
+            if (empleados.size() == 0) {
+                existeOtherRFC = true;                 
+            }
+        }
+        return existeOtherRFC;
+    }
+    
+    public Boolean otherRFC(String rfc, EmpleadoModel empleado) {
+        List<EmpleadoModel> empleados = new ArrayList<>();
+         Boolean existeOtherRFC = false;
+        
+        if(empleado.getRfc().equals(rfc)){
+            existeOtherRFC = true; 
+        }else{
+            if (rfc != null) {
+                empleados = empleadoRepository.findByRFC(rfc);
+                if (empleados.size() == 0) {
+                    existeOtherRFC = true;                 
+                }
+            }    
+        }
+        return existeOtherRFC;
+    }
 }

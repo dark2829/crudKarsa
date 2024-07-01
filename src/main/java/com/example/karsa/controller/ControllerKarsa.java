@@ -83,7 +83,7 @@ public class ControllerKarsa {
      * </ul>
      */
     @GetMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<Map<String, Object>> obtenerEmpleado(@PathVariable @Min(value = 1, message = "El Id debe ser un número positivo") Integer id){
+    public ResponseEntity<Map<String, Object>> obtenerEmpleado(@PathVariable @Min(value = 0, message = "El Id debe ser un número positivo") Integer id){
         Map<String, Object> data = new HashMap<>();
         try{
             data = empleadoServiceInt.obtenerEmpleadoId(id);
