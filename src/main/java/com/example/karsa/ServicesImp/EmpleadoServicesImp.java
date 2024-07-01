@@ -5,29 +5,63 @@ import com.example.karsa.ServicesInt.ISecuenciaServiceInt;
 import com.example.karsa.model.EmpleadoModel;
 import com.example.karsa.repository.IEmpleadoRepository;
 import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.time.Month;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity; 
 import org.springframework.stereotype.Service;
+
+/**
+ * Capa de tratamiento de los datos que implementa la interfaz {@link IEmpleadoServicesInt}
+ * En esta clase se realiza una sobreescritura de los métodos.
+ * @author Alejandro Toscuento Flores
+ * @see IEmpleadoServicesInt
+ * @see IEmpleadoRepository
+ * @see ISecuenciaServiceInt
+ * @version 29/06/2024
+ */
 
 @Service
 public class EmpleadoServicesImp implements IEmpleadoServicesInt{
     
+    /**
+     * Repositorio de empleados para realizar las acciones de persistencia.
+     * Este campo inyectado por spring mediante la anotacion {@link Autowired}
+     */
     @Autowired
     private IEmpleadoRepository empleadoRepository;
     
+    /**
+     * Interfaz en la cual se define el metodo para la generacion de seucuencias unicas.
+     * Este campo inyectado por spring mediante la anotacion {@link Autowired}
+     */
     @Autowired
     private ISecuenciaServiceInt secuenciaServices; 
     
+    /**
+     * Crea un empleado nuevo y lo almacena en la base de datos.
+     * <p>
+     * Este metodo utiliza el servicio de secuencia para obtener un id unico.
+     * Obtiene solo el nombre del nombre completo y lo agrega en el campo especifico del objeto.
+     * Realiza la insercion mediante {@link IEmpleadoRepository}
+     * Crea una respuesta apropiada independientemente de si el empleado se registro o no.
+     * </p>
+     * @param empleado Un objeto de tipo {@link EmpleadoModel} el cual no contiene:
+     * <ul>
+     * <li>id</li>
+     * <li>nombre</li>
+     * </ul>
+     * @return Devuelve una respuesta estructurada de la sigueinte manera:
+     * <ul>
+     * <li>{@link Boolean} indicando si el proceso fue exitoso</li>
+     * <li>{@link HttpStatus} indicando el verbo de la operacion</li>
+     * <li>{@link String} un mensaje descriptivo</li>
+     * <li>{@link EmpleadoModel} la informacion del empleado</li>
+     * </ul>
+     */
     @Override
     public Map<String, Object> crearEmpleado(EmpleadoModel empleado) {
         Map<String, Object> respuesta = null; 
@@ -49,6 +83,17 @@ public class EmpleadoServicesImp implements IEmpleadoServicesInt{
         return respuesta; 
     }
 
+    /**
+     * Obtiene el empleado mediante el id y retorna una respuesta adecuada, dependiendo del resultado de la operación.
+     * @param id Identificador del empleado de tipo {@link Integer}.
+     * @return Devuelve una respuesta estructurada de la sigueinte manera:
+     * <ul>
+     * <li>{@link Boolean} indicando si el proceso fue exitoso</li>
+     * <li>{@link HttpStatus} indicando el verbo de la operacion</li>
+     * <li>{@link String} un mensaje descriptivo</li>
+     * <li>{@link EmpleadoModel} la informacion del empleado</li>
+     * </ul>
+     */
     @Override
     public Map<String, Object> obtenerEmpleadoId(int id) {
         Map<String, Object> respuesta; 
@@ -65,7 +110,27 @@ public class EmpleadoServicesImp implements IEmpleadoServicesInt{
         }
         return respuesta; 
     }
-
+    
+    /**
+     * Realiza la actualizacion del empleado mediante el empleado recibido.
+     * <p>
+     * Realiza la busqueda del empleado mediante el id utilizando el metodo {@link #obtenerEmpleadoId(int)}
+     * Revisa que el empleado exista dentro de los registros.
+     * Crea un empleado temporal.
+     * Realiza una actualizacion de los datos modificados contenidos en el parametro de empleado.
+     * Le coloca el id original.
+     * Realiza la actualizacion mediante {@link IEmpleadoRepository}
+     * </p>
+     * @param empleadoUpdate Recibe un objeto de tipo {@link EmpleadoModel} que contiene las modificaciones a realizar.
+     * @param id El id del empleado de tipo {@link Integer}
+     * @return Devuelve una respuesta estructurada de la sigueinte manera:
+     * <ul>
+     * <li>{@link Boolean} indicando si el proceso fue exitoso</li>
+     * <li>{@link HttpStatus} indicando el verbo de la operacion</li>
+     * <li>{@link String} un mensaje descriptivo</li>
+     * <li>{@link EmpleadoModel} la informacion del empleado</li>
+     * </ul>
+     */
     @Override
     public Map<String, Object> modificarEmpleado(EmpleadoModel empleadoUpdate, Integer id) {
         Map<String, Object> respuesta = null; 
@@ -89,13 +154,28 @@ public class EmpleadoServicesImp implements IEmpleadoServicesInt{
         }
         return respuesta; 
     }
-
+    
+    /**
+     * Elimina un registro existente en la base de datos.
+     * <p>
+     * Busca si el empleado existe dentro de los registros.
+     * Si el empleado existe realiza la eliminacion mediante {@link IEmpleadoRepository}
+     * </p>
+     * @param id Identificador del empleado de tipo {@link Integer}
+     * @return Devuelve una respuesta estructurada de la sigueinte manera:
+     * <ul>
+     * <li>{@link Boolean} indicando si el proceso fue exitoso</li>
+     * <li>{@link HttpStatus} indicando el verbo de la operacion</li>
+     * <li>{@link String} un mensaje descriptivo</li>
+     * <li>{@link EmpleadoModel} la informacion del empleado</li>
+     * </ul>
+     */
     @Override
-    public Map<String, Object> boorarEmpleado(int id) {
+    public Map<String, Object> borarEmpleado(int id) {
         Map<String, Object> respuesta; 
         try{
             EmpleadoModel empleado = getEmpleado(id);
-            Boolean isDeleteOk = eliminarEmpleado(id);
+            Boolean isDeleteOk = eliminarEmpleado(id, empleado);
             if(isDeleteOk == true){
                 respuesta = crearRespuesta(Boolean.TRUE, HttpStatus.OK, "Empleado eliminado", empleado);
             }else{
@@ -107,7 +187,19 @@ public class EmpleadoServicesImp implements IEmpleadoServicesInt{
         }
         return respuesta; 
     }
-
+    
+    /**
+     * Realiza una busqueda de un registro existente mediante el nombre proporcionado.
+     * Si existe al menos un elemento regresa una lista de objetos que coincidan con ese nombre.
+     * @param nombre
+     * @return Devuelve una respuesta estructurada de la sigueinte manera:
+     * <ul>
+     * <li>{@link Boolean} indicando si el proceso fue exitoso</li>
+     * <li>{@link HttpStatus} indicando el verbo de la operacion</li>
+     * <li>{@link String} un mensaje descriptivo</li>
+     * <li>{@link EmpleadoModel} la informacion del empleado</li>
+     * </ul>
+     */
     @Override
     public Map<String, Object> buscarEmpleadoNombre(String nombre) {
         Map<String, Object> respuesta; 
@@ -159,9 +251,8 @@ public class EmpleadoServicesImp implements IEmpleadoServicesInt{
         return empleado;
     }
     
-    public Boolean eliminarEmpleado(Integer id){
+    public Boolean eliminarEmpleado(Integer id, EmpleadoModel empleado){
         Boolean isEliminatedOk = false;
-        EmpleadoModel empleado = getEmpleado(id);
         if(empleado != null){
             try{
                 empleadoRepository.deleteById(id);

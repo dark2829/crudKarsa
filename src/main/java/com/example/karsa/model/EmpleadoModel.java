@@ -13,6 +13,14 @@ import org.hibernate.validator.constraints.Length;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+/**
+ * Este modelo es una representación de la estructura de la "tabla" empleados en mongo.
+ * Importa los paquetes Data, Builder, NoArgsConstructor, AllArgsConstructor de Lombok
+ * Por ende tiene un constructor empty, constructor con todos los atributos y getter y setter de cada atributo.
+ * @author Alejandro Toscuento Flores
+ * @version 29/06/2024
+ **/
+
 @Data
 @Builder
 @NoArgsConstructor
