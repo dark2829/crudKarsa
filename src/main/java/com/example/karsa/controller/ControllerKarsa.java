@@ -1,6 +1,7 @@
 package com.example.karsa.controller;
 
 import com.example.karsa.ServicesInt.IEmpleadoServicesInt;
+import com.example.karsa.model.BusquedaModel;
 import com.example.karsa.model.EmpleadoModel;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/gs/empleados")
+@CrossOrigin
 public class ControllerKarsa {
     
     /**
@@ -171,6 +174,27 @@ public class ControllerKarsa {
         }
         HttpStatus http = (HttpStatus) data.get("http");
         return new ResponseEntity<>(data, http);
-    }    
+    }  
+    
+    @GetMapping(value = "/empleados", produces = "application/json")
+    public ResponseEntity<Map<String, Object>> obtenerEmpleados(){
+        Map<String, Object> data = new HashMap<>();
+        try{
+            data = empleadoServiceInt.obtenerEmpleados();
+        }catch(Exception e){
+            String message = "Error parametro no valido";
+            data = empleadoServiceInt.crearRespuesta(Boolean.FALSE, HttpStatus.BAD_REQUEST, message, null);
+        }
+        HttpStatus http = (HttpStatus) data.get("http");
+        return new ResponseEntity<>(data, http);
+    }
+    
+    @PostMapping(value = "/findOptions", produces = "application/json")
+    public ResponseEntity<Map<String, Object>> getEmpleadosOptional(@RequestBody BusquedaModel empleado){
+        Map<String, Object> data = new HashMap<>();        
+        data = empleadoServiceInt.obtenerEmpleadosCriterios(empleado); 
+        HttpStatus http = (HttpStatus) data.get("http");
+        return new ResponseEntity<>(data, http);
+    }
     
 }

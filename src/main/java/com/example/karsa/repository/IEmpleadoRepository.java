@@ -31,4 +31,12 @@ public interface IEmpleadoRepository extends MongoRepository<EmpleadoModel, Inte
      */
     @Query("{ 'rfc': ?0 }")
     List<EmpleadoModel> findByRFC(String nombre);
+    
+    @Query("{ $and: [ " +
+           "{ $or: [ { 'nombre': { $exists: ?0 } }, { 'nombre': ?0 } ] }, " +
+           "{ $or: [ { 'id': { $exists: ?1 } }, { 'id': { $eq: ?1 } } ] }, " +
+           "{ $or: [ { 'rfc': { $exists: ?2 } }, { 'rfc': ?2 } ] }, " +
+           "{ $or: [ { 'status': { $exists: ?3 } }, { 'status': ?3 } ] } ] }"
+    )
+    List<EmpleadoModel> buscarEmpleadosConOr(Integer id, String nombre, String rfc, String estatus);
 }

@@ -2,6 +2,7 @@ package com.example.karsa.ServicesImp;
 
 import com.example.karsa.ServicesInt.IEmpleadoServicesInt;
 import com.example.karsa.ServicesInt.ISecuenciaServiceInt;
+import com.example.karsa.model.BusquedaModel;
 import com.example.karsa.model.EmpleadoModel;
 import com.example.karsa.repository.IEmpleadoRepository;
 import java.lang.reflect.Field;
@@ -11,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +44,9 @@ public class EmpleadoServicesImp implements IEmpleadoServicesInt{
      */
     @Autowired
     private ISecuenciaServiceInt secuenciaServices; 
+    
+    @Autowired
+    private MongoTemplate mongoTemplate;
     
     /**
      * Crea un empleado nuevo y lo almacena en la base de datos.
@@ -243,6 +250,45 @@ public class EmpleadoServicesImp implements IEmpleadoServicesInt{
         return respuesta; 
     }
     
+    @Override
+    public Map<String, Object> obtenerEmpleados() {
+        Map<String, Object> respuesta;
+        List<EmpleadoModel> empleados = this.empleadoRepository.findAll();
+        if (empleados != null) {
+            respuesta = crearRespuestaLista(Boolean.TRUE, HttpStatus.OK, "Consulta a empleados exitosa", empleados);
+        } else {
+            respuesta = crearRespuesta(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Error al consultar a todos los empleados", null);
+        }
+        return respuesta;
+    }
+    
+    @Override
+    public Map<String, Object> obtenerEmpleadosCriterios(BusquedaModel empleado){
+        Map<String, Object> respuesta;
+        Query query = new Query();
+        System.out.println(empleado);
+        if(empleado.getId() != null){
+            query.addCriteria(Criteria.where("id").is(empleado.getId()));
+        }
+        if(empleado.getNombre() != null){
+            query.addCriteria(Criteria.where("nombre").is(empleado.getNombre()));
+        }
+        if(empleado.getRfc() != null){
+            query.addCriteria(Criteria.where("rfc").is(empleado.getRfc()));
+        }
+        if(empleado.getEstatus() != null){
+            query.addCriteria(Criteria.where("status").is(empleado.getEstatus()));
+        }
+        System.out.println(query);
+        List<EmpleadoModel> empleados = mongoTemplate.find(query, EmpleadoModel.class);
+        if (empleados != null) {
+            respuesta = crearRespuestaLista(Boolean.TRUE, HttpStatus.OK, "Consulta a empleados exitosa", empleados);
+        } else {
+            respuesta = crearRespuesta(Boolean.FALSE, HttpStatus.BAD_REQUEST, "Error al consultar a todos los empleados", null);
+        }
+        return respuesta;
+    }
+    
     public Map<String, Object> crearRespuestaLista(Boolean estatus, HttpStatus http, String mensaje, List<EmpleadoModel> empleado){
         Map<String, Object> respuesta = new HashMap<>();
         respuesta.put("status", estatus);
@@ -352,4 +398,5 @@ public class EmpleadoServicesImp implements IEmpleadoServicesInt{
         }
         return existeOtherRFC;
     }
+
 }

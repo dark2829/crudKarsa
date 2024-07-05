@@ -1,5 +1,6 @@
 package com.example.karsa.ServicesInt;
 
+import com.example.karsa.model.BusquedaModel;
 import com.example.karsa.model.EmpleadoModel;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -52,5 +53,14 @@ public interface IEmpleadoServicesInt {
      * @param empleado Tipo EmpleadoModel o null en caso de cumplir para mostrar la insersion, búsquedas o modificaciones realizadas.
      * @return Devuelve un objeto tipo Map con las siguientes claves, status, http, message, data.
      */
-    Map<String, Object> crearRespuesta(Boolean estatus, HttpStatus http, String mensaje, EmpleadoModel empleado);
+    public Map<String, Object> crearRespuesta(Boolean estatus, HttpStatus http, String mensaje, EmpleadoModel empleado);
+    
+    /**
+     * Consulta todos los empleados
+     * @return una lista de empleados dentro de object
+     */
+    public Map<String, Object> obtenerEmpleados();
+    
+    public Map<String, Object> obtenerEmpleadosCriterios(BusquedaModel empleado);
+    
 }
